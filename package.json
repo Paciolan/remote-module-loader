@@ -7,7 +7,7 @@
   "license": "",
   "repository": {
     "type": "ssh",
-    "url": "git@gitlabdev.paciolan.info:development/library/library/remote-module-loader.git"
+    "url": "git@gitlabdev.paciolan.info:development/library/javascript/remote-module-loader.git"
   },
   "scripts": {
     "build": "NODE_ENV=production webpack --mode production",
