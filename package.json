@@ -2,7 +2,7 @@
   "name": "@paciolan/remote-module-loader",
   "version": "1.0.0-symantec-versioning",
   "description": "",
-  "main": "dist/main.js",
+  "main": "dist/index.js",
   "author": "Paciolan",
   "license": "",
   "repository": {
