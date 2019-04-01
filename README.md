@@ -2,13 +2,21 @@
 
 Loads a module from a remote url.
 
+# Use Cases
+
+Lazy Load Modules to keep initial load times down and load modules just in time.
+
+Update Remote Modules independent of the web application. Update a module without redeploying the web application.
+
 # Install
 
 ```bash
 npm install @paciolan/remote-module-loader
 ```
 
-# Simple Example
+# createLoadRemoteModule
+
+## Simple Example
 
 If your module has no external dependencies, this is the easiest method to fetch the remote module.
 
@@ -22,22 +30,7 @@ import { createLoadRemoteModule } from "@paciolan/remote-module-loader";
 export default createLoadRemoteModule();
 ```
 
-```javascript
-/**
- * src/index.js
- */
-
-import loadRemoteModule from "./lib/loadRemoteModule";
-
-const myModule = loadRemoteModule("http://fake.url/modules/my-module.js");
-
-myModule.then(m => {
-  const value = m.default();
-  console.log({ value });
-});
-```
-
-# Require Example
+## Require Example
 
 You can pass dependencies to the module.
 
@@ -59,22 +52,7 @@ const requires = name => dependencies[name];
 export default createLoadRemoteModule({ requires });
 ```
 
-```javascript
-/**
- * src/index.js
- */
-
-import loadRemoteModule from "./lib/loadRemoteModule";
-
-const myModule = loadRemoteModule("http://fake.url/modules/my-module.js");
-
-myModule.then(m => {
-  const value = m.default();
-  console.log({ value });
-});
-```
-
-# Using your own fetcher
+## Using your own fetcher
 
 By default `loadRemoteModule` will use the `XMLHttpRequest` object avaiable in the browser. This can be overridden if you want to use an alternate method.
 
@@ -91,6 +69,10 @@ const fetcher = url => axios.get(url).then(request => request.data);
 export default createLoadRemoteModule({ fetcher });
 ```
 
+# Usage
+
+Modules are loaded asynchronously, so use similar techniques to any other async function.
+
 ```javascript
 /**
  * src/index.js
@@ -104,20 +86,6 @@ myModule.then(m => {
   const value = m.default();
   console.log({ value });
 });
-```
-
-# React Hooks
-
-The same techniques to include a `requires` and a `fetcher` with `createLoadRemoteModule` also work with `createUseRemoteComponent`. No need to go over them again.
-
-```javascript
-/**
- * src/lib/useRemoteComponent.js
- */
-
-import { createUseRemoteComponent } from "@paciolan/remote-module-loader";
-
-export default createUseRemoteComponent();
 ```
 
 # Contributors
