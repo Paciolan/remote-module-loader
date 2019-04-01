@@ -1,0 +1,45 @@
+image: paciolanhub/alpine-node-dev:10.15.3c
+
+variables:
+  REPO_URL: gitlabdev.paciolan.info
+
+stages:
+  - build
+#  - deploy
+
+Build & Test:
+  stage: build
+  tags:
+    - gitlabdev
+  except:
+    - tags
+  before_script:
+    - npm ci
+  script:
+    - npm run build
+    - npm run lint
+    - npm run test:coverage -- --colors
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - dist/
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+
+Deploy:
+  stage: deploy
+  environment: NPM
+  tags:
+    - gitlabdev
+  only:
+    - master
+  except:
+    - tags
+  before_script:
+    # add git ssh key
+    - ssh-keyscan $SSH_KNOWN_HOSTS >> ~/.ssh/known_hosts
+    - eval $(ssh-agent -s)
+    - echo "$GIT_SSH_PRIV_KEY" | ssh-add -
+  script:
+    # publish
+    - semantic-release-gitlab
+    - npm-publish-git-tag
