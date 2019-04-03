@@ -1,4 +1,4 @@
-# Remote Module Loader [![pipeline status](https://gitlabdev.paciolan.info/development/library/javascript/remote-module-loader/badges/master/pipeline.svg)](https://gitlabdev.paciolan.info/development/library/javascript/remote-module-loader/commits/master) [![coverage report](https://gitlabdev.paciolan.info/development/library/javascript/remote-module-loader/badges/master/coverage.svg)](https://gitlabdev.paciolan.info/development/library/javascript/remote-module-loader/commits/master)
+# Remote Module Loader ![coverage:100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 
 Loads a CommonJS module from a remote url.
 
