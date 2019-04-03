@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "author": "Paciolan",
-  "license": "",
+  "license": "MIT",
   "repository": {
     "type": "ssh",
     "url": "git@gitlabdev.paciolan.info:development/library/javascript/remote-module-loader.git"
