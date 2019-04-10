@@ -43,16 +43,16 @@ You can pass dependencies to the module. All modules loaded with this version of
  * src/lib/loadRemoteModule.js
  */
 
-import { createLoadRemoteModule } from "@paciolan/remote-module-loader";
+import {
+  createLoadRemoteModule,
+  createRequires
+} from "@paciolan/remote-module-loader";
 
-// dependencies for the loaded module.
 const dependencies = {
   react: require("react")
 };
 
-// requires method exposes dependencies to the loaded module.
-const requires = name => dependencies[name];
-
+const requires = createRequires(dependencies);
 export default createLoadRemoteModule({ requires });
 ```
 
