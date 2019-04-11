@@ -1,6 +1,6 @@
 # Remote Module Loader ![coverage:100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 
-![Starter Kit](https://raw.githubusercontent.com/Paciolan/remote-module-loader/master/media/logo-small.png)
+![Lunar Module](https://raw.githubusercontent.com/Paciolan/remote-module-loader/master/media/logo-small.png)
 
 Loads a CommonJS module from a remote url.
 
