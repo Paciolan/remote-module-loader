@@ -1,7 +1,7 @@
 image: paciolanhub/alpine-node-dev:10.15.3c
 
 variables:
-  REPO_URL: gitlabdev.paciolan.info
+  GITHUB_URL: git@github.com:Paciolan/remote-module-loader.git
 
 stages:
   - build
@@ -40,6 +40,11 @@ Deploy:
     - eval $(ssh-agent -s)
     - echo "$GIT_SSH_PRIV_KEY" | ssh-add -
   script:
-    # publish
+    # create tag
     - semantic-release-gitlab
+
+    # set repository to github for npm link
+    - node -e "require('fs').writeFileSync('./package.json', JSON.stringify(Object.assign(require('./package.json'), {repository:{type:'git',url:'$GITHUB_URL'}}), null, 2), 'utf8')"
+
+    # deploy
     - npm-publish-git-tag
