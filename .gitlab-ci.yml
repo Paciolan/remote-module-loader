@@ -41,7 +41,7 @@ Deploy:
     - echo "$GIT_SSH_PRIV_KEY" | ssh-add -
   script:
     # create tag
-    - semantic-release-gitlab
+    - semantic-delivery-gitlab
 
     # set repository to github for npm link
     - node -e "require('fs').writeFileSync('./package.json', JSON.stringify(Object.assign(require('./package.json'), {repository:{type:'git',url:'$GITHUB_URL'}}), null, 2), 'utf8')"
