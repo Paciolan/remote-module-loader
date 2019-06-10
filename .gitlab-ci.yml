@@ -1,4 +1,4 @@
-image: paciolanhub/alpine-node-dev:10.15.3c
+image: paciolanhub/alpine-node-dev:10.15.3-c2
 
 variables:
   GITHUB_URL: git@github.com:Paciolan/remote-module-loader.git
