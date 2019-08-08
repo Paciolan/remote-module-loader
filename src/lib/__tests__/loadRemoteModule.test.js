@@ -1,5 +1,5 @@
-import { createLoadRemoteModule } from "../loadRemoteModule";
-import xmlHttpRequestFetcher from "../xmlHttpRequestFetcher";
+const { createLoadRemoteModule } = require("../loadRemoteModule");
+const xmlHttpRequestFetcher = require("../xmlHttpRequestFetcher");
 
 const invalidModule = "'";
 const validModule = 'Object.assign(exports, { default: () => "SUCCESS!" })';
