@@ -9,5 +9,11 @@
         }
       }
     ]
-  ]
+  ],
+  "env": {
+    "test": {
+      "sourceMaps": true,
+      "retainLines": true
+    }
+  }
 }
