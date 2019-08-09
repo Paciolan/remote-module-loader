@@ -10,5 +10,10 @@
       }
     ]
   ],
-  "plugins": ["@babel/plugin-transform-modules-umd"]
+  "env": {
+    "test": {
+      "sourceMaps": true,
+      "retainLines": true
+    }
+  }
 }

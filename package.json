@@ -13,7 +13,7 @@
     "build": "npm run clean && npx babel src --ignore **/*.test.js --out-dir dist --source-maps",
     "clean": "rimraf dist",
     "cz": "git-cz",
-    "test": "jest",
+    "test": "cross-env NODE_ENV=test jest",
     "test:changed": "npm run test -- --changedSince HEAD",
     "test:coverage": "npm run test -- --coverage",
     "lint": "eslint ."
@@ -22,11 +22,12 @@
   "devDependencies": {
     "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
-    "@babel/plugin-transform-modules-umd": "^7.2.0",
     "@babel/preset-env": "^7.5.5",
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-conventional": "^8.1.0",
+    "@types/jest": "^24.0.17",
     "babel-loader": "^8.0.6",
+    "cross-env": "^5.2.0",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.1.0",
