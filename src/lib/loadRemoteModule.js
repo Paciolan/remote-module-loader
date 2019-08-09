@@ -14,7 +14,9 @@ export const createLoadRemoteModule = ({
   memoize(url =>
     fetcher(url).then(data => {
       const exports = {};
-      new Function("require", "exports", data)(requires, exports);
-      return exports;
+      const module = { exports };
+      const func = new Function("require", "module", "exports", data);
+      func(requires, module, exports);
+      return module.exports;
     })
   );

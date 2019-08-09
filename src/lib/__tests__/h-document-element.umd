@@ -1,0 +1,158 @@
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define('h-document-element', ['exports'], factory) :
+    (global = global || self, factory(global['h-document-element'] = {}));
+}(this, function (exports) { 'use strict';
+
+    /*! *****************************************************************************
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+    this file except in compliance with the License. You may obtain a copy of the
+    License at http://www.apache.org/licenses/LICENSE-2.0
+
+    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+    MERCHANTABLITY OR NON-INFRINGEMENT.
+
+    See the Apache Version 2.0 License for specific language governing permissions
+    and limitations under the License.
+    ***************************************************************************** */
+
+    var __assign = function() {
+        __assign = Object.assign || function __assign(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+            }
+            return t;
+        };
+        return __assign.apply(this, arguments);
+    };
+
+    function __values(o) {
+        var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+        if (m) return m.call(o);
+        return {
+            next: function () {
+                if (o && i >= o.length) o = void 0;
+                return { value: o && o[i++], done: !o };
+            }
+        };
+    }
+
+    function __read(o, n) {
+        var m = typeof Symbol === "function" && o[Symbol.iterator];
+        if (!m) return o;
+        var i = m.call(o), r, ar = [], e;
+        try {
+            while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+        }
+        catch (error) { e = { error: error }; }
+        finally {
+            try {
+                if (r && !r.done && (m = i["return"])) m.call(i);
+            }
+            finally { if (e) throw e.error; }
+        }
+        return ar;
+    }
+
+    function __spread() {
+        for (var ar = [], i = 0; i < arguments.length; i++)
+            ar = ar.concat(__read(arguments[i]));
+        return ar;
+    }
+
+    var specialProps = new Map([
+        ['class', 'className'],
+        ['for', 'htmlFor'],
+    ]);
+    var ɵ0 = function (x) { return (typeof x === 'function' && x.prototype && 'render' in x.prototype); }, ɵ1 = function (x, props, children) {
+        return new x(__assign({}, props, { children: children })).render();
+    }, ɵ2 = function (x) { return x === Fragment; }, ɵ3 = function (x, props, children) {
+        var fragment = document.createDocumentFragment();
+        fragment.append.apply(fragment, __spread(children.flat()));
+        return fragment;
+    }, ɵ4 = function (x) { return typeof x === 'function'; }, ɵ5 = function (x, props, children) {
+        return x(__assign({}, props, { children: children }));
+    }, ɵ6 = function (x) { return typeof x === 'string'; }, ɵ7 = function (x, props, children) {
+        var e_1, _a;
+        var element = document.createElement(x);
+        try {
+            for (var _b = __values(Object.entries(props || {})), _c = _b.next(); !_c.done; _c = _b.next()) {
+                var _d = __read(_c.value, 2), name_1 = _d[0], value = _d[1];
+                if (name_1.startsWith('on')) {
+                    name_1 = name_1.toLowerCase();
+                }
+                else if (specialProps.has(name_1)) {
+                    name_1 = specialProps.get(name_1); // tslint:disable-line:no-non-null-assertion
+                }
+                element[name_1] = value;
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        element.append.apply(element, __spread(children.flat()));
+        return element;
+    }, ɵ8 = function (x) { throw new Error("Expected string, function or class, but given " + x); }, ɵ9 = function () { return undefined; };
+    var elementFactories = [
+        {
+            match: ɵ0,
+            get: ɵ1
+        },
+        {
+            match: ɵ2,
+            get: ɵ3,
+        },
+        {
+            match: ɵ4,
+            get: ɵ5
+        },
+        {
+            match: ɵ6,
+            get: ɵ7
+        },
+        {
+            match: ɵ8,
+            get: ɵ9,
+        },
+    ];
+    function createElement(name, props) {
+        var children = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            children[_i - 2] = arguments[_i];
+        }
+        return elementFactories.find(function (_a) {
+            var match = _a.match;
+            return match(name);
+        }) // tslint:disable-line:no-non-null-assertion
+            .get(name, props, children);
+    }
+    function Fragment() {
+    }
+    var h = createElement;
+
+    exports.Fragment = Fragment;
+    exports.createElement = createElement;
+    exports.h = h;
+    exports.ɵ0 = ɵ0;
+    exports.ɵ1 = ɵ1;
+    exports.ɵ2 = ɵ2;
+    exports.ɵ3 = ɵ3;
+    exports.ɵ4 = ɵ4;
+    exports.ɵ5 = ɵ5;
+    exports.ɵ6 = ɵ6;
+    exports.ɵ7 = ɵ7;
+    exports.ɵ8 = ɵ8;
+    exports.ɵ9 = ɵ9;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
+
+}));
+//# sourceMappingURL=h-document-element.umd.js.map

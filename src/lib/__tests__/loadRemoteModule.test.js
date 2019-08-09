@@ -1,14 +1,20 @@
+const fs = require("fs");
 const { createLoadRemoteModule } = require("../loadRemoteModule");
 const xmlHttpRequestFetcher = require("../xmlHttpRequestFetcher");
 
 const invalidModule = "'";
 const validModule = 'Object.assign(exports, { default: () => "SUCCESS!" })';
+const umdModule = fs.readFileSync(
+  __dirname + "/h-document-element.umd",
+  "utf8"
+);
 const requiresModules =
   'Object.assign(exports, { default: () => require("test") })';
 
 const mockFetcher = url =>
     url === "http://valid.url" ? Promise.resolve(validModule)
     : url === "http://requires.url" ? Promise.resolve(requiresModules)
+    : url === "http://umdmodule.url" ? Promise.resolve(umdModule)
     : Promise.resolve(invalidModule); // prettier-ignore
 
 jest.mock("../xmlHttpRequestFetcher", () =>
@@ -59,5 +65,13 @@ describe("lib/loadRemoteModule", () => {
     const module = await loadRemoteModule("http://requires.url");
     const actual = () => module.default();
     expect(actual).toThrowError(expected);
+  });
+
+  test("umd load", async () => {
+    const remoteModuleLoader = createLoadRemoteModule();
+    const result = await remoteModuleLoader("http://umdmodule.url");
+    expect(result.Fragment).toBeDefined();
+    expect(result.createElement).toBeDefined();
+    expect(result.h).toBeDefined();
   });
 });
