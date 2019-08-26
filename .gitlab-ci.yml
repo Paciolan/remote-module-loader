@@ -23,6 +23,7 @@ Build & Test:
     expire_in: 1 hour
     paths:
       - dist/
+      - node_modules/
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
 
 Deploy:
@@ -40,11 +41,8 @@ Deploy:
     - eval $(ssh-agent -s)
     - echo "$GIT_SSH_PRIV_KEY" | ssh-add -
   script:
-    # create tag
-    - semantic-delivery-gitlab --token ${GITLAB_AUTH_TOKEN}
-
     # set repository to github for npm link
     - node -e "require('fs').writeFileSync('./package.json', JSON.stringify(Object.assign(require('./package.json'), {repository:{type:'git',url:'$GITHUB_URL'}}), null, 2), 'utf8')"
 
     # deploy
-    - npm-deploy-git-tag --access public
+    - npx semantic-release
