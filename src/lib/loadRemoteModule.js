@@ -1,5 +1,12 @@
 import memoize from "./memoize";
 import xmlHttpRequestFetcher from "./xmlHttpRequestFetcher";
+import nodeFetcher from "./nodeFetcher";
+
+const isBrowser =
+  typeof window !== "undefined" && typeof window.document !== "undefined";
+
+/* istanbul ignore next - difficult to test */
+const defaultFetcher = isBrowser ? xmlHttpRequestFetcher : nodeFetcher;
 
 const defaultRequires = name => {
   throw new Error(
@@ -9,7 +16,7 @@ const defaultRequires = name => {
 
 export const createLoadRemoteModule = ({
   requires = defaultRequires,
-  fetcher = xmlHttpRequestFetcher
+  fetcher = defaultFetcher
 } = {}) =>
   memoize(url =>
     fetcher(url).then(data => {

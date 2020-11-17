@@ -31,7 +31,7 @@ If your module has no external dependencies, this is the easiest method to fetch
  * src/lib/loadRemoteModule.js
  */
 
-import { createLoadRemoteModule } from "@paciolan/remote-module-loader";
+import createLoadRemoteModule from "@paciolan/remote-module-loader";
 
 export default createLoadRemoteModule();
 ```
@@ -45,8 +45,7 @@ You can pass dependencies to the module. All modules loaded with this version of
  * src/lib/loadRemoteModule.js
  */
 
-import {
-  createLoadRemoteModule,
+import createLoadRemoteModule, {
   createRequires
 } from "@paciolan/remote-module-loader";
 
@@ -67,7 +66,7 @@ By default `loadRemoteModule` will use the `XMLHttpRequest` object avaiable in t
  * src/lib/loadRemoteModule.js
  */
 
-import { createLoadRemoteModule } from "@paciolan/remote-module-loader";
+import createLoadRemoteModule from "@paciolan/remote-module-loader";
 import axios from "axios";
 
 const fetcher = url => axios.get(url).then(request => request.data);
