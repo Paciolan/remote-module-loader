@@ -20,9 +20,5 @@ Test:
   extends: .nodejs_lint_test_coverage
 
 Publish:
-  # https://gitlabdev.paciolan.info/development/tools/gitlab-ci-templates/blob/master/nodejs/publish.yml
+  # https://gitlabdev.paciolan.info/development/tools/gitlab-ci-templates/-/blob/master/nodejs/publish_semantic_release.yml
   extends: .nodejs_publish_semantic_release
-  script:
-    # set repository to github for npm link
-    - node -e "require('fs').writeFileSync('./package.json', JSON.stringify(Object.assign(require('./package.json'), {repository:{type:'git',url:'$GITHUB_URL'}}), null, 2), 'utf8')"
-    - semantic-release
