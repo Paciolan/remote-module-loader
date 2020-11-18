@@ -12,7 +12,7 @@ VERSION=$1
 node -e "require('fs').writeFileSync('./package.json', JSON.stringify(Object.assign(require('./package.json'), {repository:{type:'git',url:'$GITHUB_URL'}}), null, 2), 'utf8')"
 
 # update 
-node -e "require('fs').writeFileSync('./package.json', JSON.stringify(Object.assign(require('./package.json'), {version: "$VERSION"}), null, 2), 'utf8')"
+node -e "require('fs').writeFileSync('./package.json', JSON.stringify(Object.assign(require('./package.json'), {version: '$VERSION'}), null, 2), 'utf8')"
 
 # publish
 npm publish
