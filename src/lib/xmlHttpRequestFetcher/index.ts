@@ -1,7 +1,8 @@
 import { DONE } from "./readyState";
 import { OK } from "./status";
+import { Fetcher } from "../../models";
 
-const xmlHttpRequestFetcher = url =>
+const xmlHttpRequestFetcher: Fetcher = url =>
   new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = () => {

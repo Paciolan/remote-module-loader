@@ -5,12 +5,12 @@
  * @returns {Function} Memoized version of func.
  */
 const memoize = func => {
-  var cache = {};
-  return x => {
-    if (x in cache == false) {
-      cache[x] = func(x);
+  const cache = {};
+  return key => {
+    if (key in cache == false) {
+      cache[key] = func(key);
     }
-    return cache[x];
+    return cache[key];
   };
 };
 

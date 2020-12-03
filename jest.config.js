@@ -1,6 +1,7 @@
 module.exports = {
-  collectCoverageFrom: ["./src/**/*.js"],
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
+  preset: "ts-jest",
+  collectCoverageFrom: ["./src/**/*.ts"],
+  coveragePathIgnorePatterns: ["./src/index.ts"],
   coverageThreshold: {
     global: {
       branches: 100,

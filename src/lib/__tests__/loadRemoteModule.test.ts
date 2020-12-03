@@ -1,6 +1,6 @@
-const fs = require("fs");
-const { createLoadRemoteModule } = require("../loadRemoteModule");
-const xmlHttpRequestFetcher = require("../xmlHttpRequestFetcher");
+import * as fs from "fs";
+import { createLoadRemoteModule } from "../loadRemoteModule";
+import xmlHttpRequestFetcher from "../xmlHttpRequestFetcher";
 
 const invalidModule = "'";
 const validModule = 'Object.assign(exports, { default: () => "SUCCESS!" })';
@@ -17,9 +17,9 @@ const mockFetcher = url =>
     : url === "http://umdmodule.url" ? Promise.resolve(umdModule)
     : Promise.resolve(invalidModule); // prettier-ignore
 
-jest.mock("../xmlHttpRequestFetcher", () =>
-  jest.fn().mockImplementation(url => mockFetcher(url))
-);
+jest.mock("../xmlHttpRequestFetcher", () => ({
+  default: jest.fn().mockImplementation(url => mockFetcher(url))
+}));
 
 describe("lib/loadRemoteModule", () => {
   beforeEach(() => {

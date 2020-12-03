@@ -13,19 +13,19 @@ describe("lib/xmlHttpRequestFetcher", () => {
       const isValid = mockXhrRequest[1] === "http://valid.url";
 
       mockXhr.readyState = OPENED;
-      mockXhr.onreadystatechange();
+      (<any>mockXhr).onreadystatechange();
 
       mockXhr.readyState = DONE;
-      mockXhr.status = isValid ? OK : InternalServerError;
-      mockXhr.responseText = isValid ? "SUCCESS" : "";
-      mockXhr.statusText = isValid ? "OK" : "Internal Server Error";
-      mockXhr.onreadystatechange();
+      (<any>mockXhr).status = isValid ? OK : InternalServerError;
+      (<any>mockXhr).responseText = isValid ? "SUCCESS" : "";
+      (<any>mockXhr).statusText = isValid ? "OK" : "Internal Server Error";
+      (<any>mockXhr).onreadystatechange();
     }),
     readyState: UNSENT
   };
 
   beforeAll(() => {
-    global.XMLHttpRequest = jest.fn(() => mockXhr);
+    (<any>global).XMLHttpRequest = jest.fn(() => mockXhr);
   });
 
   afterAll(() => {
