@@ -1,8 +1,8 @@
 # Remote Module Loader ![coverage:100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 
-![Lunar Module](https://raw.githubusercontent.com/Paciolan/remote-module-loader/master/media/logo-small.png)
+Loads a CommonJS module from a remote URL for the Browser or Node.js.
 
-Loads a CommonJS module from a remote url.
+![Lunar Module](https://raw.githubusercontent.com/Paciolan/remote-module-loader/master/media/logo-small.png)
 
 # Use Cases
 
@@ -59,7 +59,9 @@ export default createLoadRemoteModule({ requires });
 
 ## Using your own fetcher
 
-By default `loadRemoteModule` will use the `XMLHttpRequest` object avaiable in the browser. This can be overridden if you want to use an alternate method.
+The default loader can be overridden if you want to use an alternate method.
+
+This example uses `axios` for the fetcher.
 
 ```javascript
 /**
@@ -122,13 +124,10 @@ Remote Modules must be in the CommonJS format, using `exports` to export functio
 This is an example of a simple CommonJS module:
 
 ```javascript
-var name = "myModule";
-
 function helloWorld() {
   console.log("Hello World!");
 }
 
-exports.name = name;
 exports.default = helloWorld;
 ```
 
@@ -146,7 +145,7 @@ exports.default = "SUCCESS!";
 
 ## Webpack
 
-Setting up Webpack to export a CommonJS is pretty easy.
+Webpack can be setup to export as CommonJS.
 
 Inside `webpack.config.js`, set the `libraryTarget` to `"commonjs"`.
 
@@ -158,9 +157,9 @@ module.exports = {
 };
 ```
 
-Dependencies that will be provided by the Web Application that uses your Remote Module can be added to webpack's `externals` section.
+Dependencies should be excluded from the bundle because they will be provided by the Web Application can be added to webpack's `externals` section.
 
-This will prevent webpack from bundling unwanted 3rd party libraries, decreasing the bundle size.
+This will prevent webpack from bundling duplicate 3rd party libraries, decreasing the bundle size.
 
 ```javascript
 module.exports = {
@@ -168,8 +167,7 @@ module.exports = {
     libraryTarget: "commonjs"
   },
   externals: {
-    react: "react",
-    "prop-types": "prop-types"
+    react: "react"
   }
 };
 ```
