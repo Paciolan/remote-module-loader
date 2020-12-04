@@ -176,6 +176,8 @@ module.exports = {
 
 Sites with a `content_security_policy` header set are likely to not work. CSP puts a restriction on using `new Function`, which `remote-module-loader` relies upon.
 
+[Read more on CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)
+
 ## Alternatives
 
 - [Webpack Module Federation](https://webpack.js.org/concepts/module-federation)
