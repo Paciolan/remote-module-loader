@@ -4,25 +4,25 @@ Loads a CommonJS module from a remote URL for the Browser or Node.js.
 
 ![Lunar Module](https://raw.githubusercontent.com/Paciolan/remote-module-loader/master/media/logo-small.png)
 
-# Use Cases
+## Use Cases
 
 Lazy Load Modules to keep initial load times down and load modules just in time, similar to Webpack's code splitting.
 
 Update Remote Modules independent of the web application. Update a module without redeploying the web application.
 
-# Install
+## Install
 
 ```bash
 npm install @paciolan/remote-module-loader
 ```
 
-# createLoadRemoteModule
+## createLoadRemoteModule
 
 The `createLoadRemoteModule` function is used to inject dependencies into a `loadRemoteModule` function.
 
 It is recommended to create a separate file, in this example it is called `src/lib/loadRemoteModule.js`.
 
-## Simple Example
+### Simple Example
 
 If your module has no external dependencies, this is the easiest method to fetch the remote module.
 
@@ -36,7 +36,7 @@ import createLoadRemoteModule from "@paciolan/remote-module-loader";
 export default createLoadRemoteModule();
 ```
 
-## Require Example
+### Require Example
 
 You can pass dependencies to the module. All modules loaded with this version of `loadRemoteModule`, will have the dependencies available to `require`.
 
@@ -57,7 +57,7 @@ const requires = createRequires(dependencies);
 export default createLoadRemoteModule({ requires });
 ```
 
-## Using your own fetcher
+### Using your own fetcher
 
 The default loader can be overridden if you want to use an alternate method.
 
@@ -76,11 +76,11 @@ const fetcher = url => axios.get(url).then(request => request.data);
 export default createLoadRemoteModule({ fetcher });
 ```
 
-# Usage
+## Usage
 
 Modules are loaded asynchronously, so use similar techniques to any other async function.
 
-## Promise Style
+### Promise Style
 
 ```javascript
 /**
@@ -117,7 +117,7 @@ const main = async () => {
 main();
 ```
 
-# Creating a Remote Module
+## Creating a Remote Module
 
 Remote Modules must be in the CommonJS format, using `exports` to export functionality.
 
@@ -143,7 +143,7 @@ exports = {
 exports.default = "SUCCESS!";
 ```
 
-## Webpack
+### Webpack
 
 Webpack can be setup to export as CommonJS.
 
@@ -172,7 +172,17 @@ module.exports = {
 };
 ```
 
-# Contributors
+## Content Security Policy (CSP)
+
+Sites with a `content_security_policy` header set are likely to not work. CSP puts a restriction on using `new Function`, which `remote-module-loader` relies upon.
+
+[Read more on CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)
+
+## Alternatives
+
+- [Webpack Module Federation](https://webpack.js.org/concepts/module-federation)
+
+## Contributors
 
 Joel Thoms (https://twitter.com/joelnet)
 
