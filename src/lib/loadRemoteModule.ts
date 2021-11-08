@@ -14,9 +14,9 @@ const defaultRequires = name => {
   );
 };
 
-interface CreateLoadRemoteModuleOptions {
-  requires: any;
-  fetcher: any;
+export interface CreateLoadRemoteModuleOptions {
+  requires?: any;
+  fetcher?: any;
 }
 
 interface LoadRemoteModule {
@@ -24,7 +24,7 @@ interface LoadRemoteModule {
 }
 
 interface CreateLoadRemoteModule {
-  (CreateLoadRemoteModuleOptions?): LoadRemoteModule;
+  (options?: CreateLoadRemoteModuleOptions): LoadRemoteModule;
 }
 
 export const createLoadRemoteModule: CreateLoadRemoteModule = ({

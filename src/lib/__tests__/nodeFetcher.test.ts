@@ -1,4 +1,5 @@
 import nodeFetcher from "../nodeFetcher";
+import { OK, InternalServerError } from "../status";
 
 // node: http and https mocks are duplicated
 jest.mock("http", () => {
@@ -9,7 +10,9 @@ jest.mock("http", () => {
       const res = {
         on: jest.fn((eventName, fn) => {
           if (url === "http://invalid.url" && onErrorCallback) {
-            onErrorCallback(new Error("500 Internal Server Error"));
+            const error = new Error("500 Internal Server Error");
+            (<any>error).response = res;
+            onErrorCallback(error);
             return res;
           }
           if (eventName === "data") {
@@ -18,8 +21,11 @@ jest.mock("http", () => {
           } else if (eventName === "end") {
             fn();
           }
+
           return res;
-        })
+        }),
+        statusCode: url === "http://invalid.url" ? InternalServerError: OK,
+        statusMessage: url === "http://invalid.url" ? "Internal Server Error": "OK"
       };
       setTimeout(() => callback(res), 0);
       return {
@@ -53,7 +59,9 @@ jest.mock("https", () => {
             fn();
           }
           return res;
-        })
+        }),
+        statusCode: url === "http://invalid.url" ? InternalServerError: OK,
+        statusMessage: url === "http://invalid.url" ? "Internal Server Error": "OK"
       };
       setTimeout(() => callback(res), 0);
       return {
@@ -91,7 +99,7 @@ describe("lib/nodeFetcher", () => {
 
   test("invalid request rejects", () => {
     expect.assertions(1);
-    const expected = new Error("500 Internal Server Error");
+    const expected = new Error("HTTP Error Response: 500 Internal Server Error (http://invalid.url)");
     const actual = nodeFetcher("http://invalid.url");
     return expect(actual).rejects.toStrictEqual(expected);
   });

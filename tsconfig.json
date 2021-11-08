@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
+    "lib": [
+      "ES2015",
+      "DOM"
+    ],
     "outDir": "dist",
     "module": "commonjs",
     "types": [
       "node",
       "jest"
     ],
-    "sourceMap": true
+    "sourceMap": true,
   },
   "include": [
     "./src/**/*.ts"
