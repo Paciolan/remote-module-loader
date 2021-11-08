@@ -1,6 +1,7 @@
 import * as http from "http";
 import * as https from "https";
 import { Fetcher } from "../models";
+import { OK } from './status'
 
 interface HttpGet {
   (url: string, ...args): http.ClientRequest;
@@ -28,6 +29,10 @@ const get: HttpGet = (url, ...args) => {
 const nodeFetcher: Fetcher = url =>
   new Promise((resolve, reject) => {
     get(url, res => {
+      if (res.statusCode !== OK) {
+        return reject(new Error(`HTTP Error Response: ${res.statusCode} ${res.statusMessage} (${url})`))
+      }
+
       let data = null;
 
       // called when a data chunk is received.

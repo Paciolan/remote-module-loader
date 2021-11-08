@@ -1,6 +1,6 @@
 import xmlHttpRequestFetcher from "..";
 import { OPENED, UNSENT, DONE } from "../readyState";
-import { OK, InternalServerError } from "../status";
+import { OK, InternalServerError } from "../../status";
 
 describe("lib/xmlHttpRequestFetcher", () => {
   const originalXmlHttpRequest = window.XMLHttpRequest;
@@ -39,8 +39,8 @@ describe("lib/xmlHttpRequestFetcher", () => {
   });
 
   test("invalid request rejects", () => {
-    const expected = "500 Internal Server Error";
+    const expected = new Error('HTTP Error Response: 500 Internal Server Error (http://invalid.url)');
     const actual = xmlHttpRequestFetcher("http://invalid.url");
-    return expect(actual).rejects.toBe(expected);
+    return expect(actual).rejects.toStrictEqual(expected);
   });
 });
