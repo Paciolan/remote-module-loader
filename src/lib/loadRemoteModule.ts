@@ -1,6 +1,7 @@
+import { Fetcher } from "../models";
 import memoize from "./memoize";
-import xmlHttpRequestFetcher from "./xmlHttpRequestFetcher/index";
 import nodeFetcher from "./nodeFetcher";
+import xmlHttpRequestFetcher from "./xmlHttpRequestFetcher/index";
 
 const isBrowser =
   typeof window !== "undefined" && typeof window.document !== "undefined";
@@ -16,7 +17,7 @@ const defaultRequires = name => {
 
 export interface CreateLoadRemoteModuleOptions {
   requires?: any;
-  fetcher?: any;
+  fetcher?: Fetcher;
 }
 
 interface LoadRemoteModule {
