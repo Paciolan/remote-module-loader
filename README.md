@@ -96,6 +96,26 @@ myModule.then(m => {
   console.log({ value });
 });
 ```
+### Named Exports
+
+```javascript
+/**
+ * src/index.js
+ */
+
+import loadRemoteModule from "./lib/loadRemoteModule";
+
+const main = async () => {
+  const myModule = await loadRemoteModule(
+    "http://fake.url/modules/my-module.js"
+  );
+  const list = myModule.getList();
+  console.log({ list });
+};
+
+main();
+```
+
 
 ## Async/Await Style
 

@@ -4,6 +4,13 @@ import xmlHttpRequestFetcher from "../xmlHttpRequestFetcher";
 
 const invalidModule = "'";
 const validModule = 'Object.assign(exports, { default: () => "SUCCESS!" })';
+const namedExportsModule =
+  'Object.assign(exports, {\n' +
+  '  delete: () => "DELETED",\n' +
+  '  create: () => "CREATED",\n' +
+  '  update: () => "UPDATED",\n' +
+  '  list: () => [],\n' +
+  '})';
 const umdModule = fs.readFileSync(
   __dirname + "/h-document-element.umd",
   "utf8"
@@ -15,6 +22,7 @@ const mockFetcher = url =>
     url === "http://valid.url" ? Promise.resolve(validModule)
     : url === "http://requires.url" ? Promise.resolve(requiresModules)
     : url === "http://umdmodule.url" ? Promise.resolve(umdModule)
+    : url === "http://namedexports.url" ? Promise.resolve(namedExportsModule)
     : Promise.resolve(invalidModule); // prettier-ignore
 
 jest.mock("../xmlHttpRequestFetcher", () => ({
@@ -73,5 +81,46 @@ describe("lib/loadRemoteModule", () => {
     expect(result.Fragment).toBeDefined();
     expect(result.createElement).toBeDefined();
     expect(result.h).toBeDefined();
+  });
+
+  test("load functions using named exports", async () => {
+    const remoteModuleLoader = createLoadRemoteModule();
+    const result = await remoteModuleLoader("http://namedexports.url");
+    expect(result.create).toBeDefined();
+    expect(result.delete).toBeDefined();
+    expect(result.update).toBeDefined();
+    expect(result.list).toBeDefined();
+  });
+
+  test("return string from create named exports function", async () => {
+    const remoteModuleLoader = createLoadRemoteModule();
+    const result = await remoteModuleLoader("http://namedexports.url");
+    const expected = "CREATED";
+    const actual = result.create();
+    expect(actual).toBe(expected);
+  });
+
+  test("return array from named exports function", async () => {
+    const remoteModuleLoader = createLoadRemoteModule();
+    const result = await remoteModuleLoader("http://namedexports.url");
+    const expected = [];
+    const actual = result.list();
+    expect(actual).toMatchObject(expected);
+  });
+
+  test("return string from delete named exports function", async () => {
+    const remoteModuleLoader = createLoadRemoteModule();
+    const result = await remoteModuleLoader("http://namedexports.url");
+    const expected = "DELETED";
+    const actual = result.delete();
+    expect(actual).toBe(expected);
+  });
+
+  test("return string from update named exports function", async () => {
+    const remoteModuleLoader = createLoadRemoteModule();
+    const result = await remoteModuleLoader("http://namedexports.url");
+    const expected = "UPDATED";
+    const actual = result.update();
+    expect(actual).toBe(expected);
   });
 });
