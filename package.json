@@ -68,5 +68,13 @@
     "commitizen": {
       "path": "./node_modules/git-cz"
     }
+  },
+  "dependencies": {
+    "https-browserify": "^1.0.0",
+    "stream-http": "^3.2.0"
+  },
+  "browser": {
+    "http": "stream-http",
+    "https": "https-browserify"
   }
 }
