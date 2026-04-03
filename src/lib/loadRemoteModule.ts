@@ -10,7 +10,7 @@ const isBrowser =
 /* istanbul ignore next - difficult to test */
 const defaultFetcher = isBrowser ? xmlHttpRequestFetcher : nodeFetcher;
 
-const defaultRequires = name => {
+const defaultRequires = (name: string) => {
   throw new Error(
     `Could not require '${name}'. The 'requires' function was not provided.`
   );
@@ -36,7 +36,7 @@ export const createLoadRemoteModule: CreateLoadRemoteModule = ({
   const _requires = requires || defaultRequires;
   const _fetcher = fetcher || defaultFetcher;
 
-  return memoize(url =>
+  return memoize((url: string) =>
     _fetcher(url).then(data => {
       const exports = {};
       const module = { exports };
@@ -54,7 +54,7 @@ export const createLoadRemoteModule: CreateLoadRemoteModule = ({
 
         deps = Array.isArray(args[args.length - 1]) ? args.pop() : ["require", "exports", "module"];
 
-        const builtins = { exports, require: _requires, module };
+        const builtins: Record<string, any> = { exports, require: _requires, module };
         const resolved = deps.map(dep => builtins[dep] || _requires(dep));
 
         const result = factory(...resolved);

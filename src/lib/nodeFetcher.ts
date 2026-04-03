@@ -4,7 +4,7 @@ import { Fetcher } from "../models";
 import { OK } from './status'
 
 interface HttpGet {
-  (url: string, ...args): http.ClientRequest;
+  (url: string, ...args: any[]): http.ClientRequest;
 }
 
 /**
@@ -13,7 +13,7 @@ interface HttpGet {
 const get: HttpGet = (url, ...args) => {
   if (typeof url !== "string") {
     return {
-      on(eventName, callback) {
+      on(eventName: string, callback: (err: Error) => void) {
         callback(new Error("URL must be a string."));
       }
     } as http.ClientRequest;
@@ -28,15 +28,15 @@ const get: HttpGet = (url, ...args) => {
  */
 const nodeFetcher: Fetcher = url =>
   new Promise((resolve, reject) => {
-    get(url, res => {
+    get(url, (res: any) => {
       if (res.statusCode !== OK) {
         return reject(new Error(`HTTP Error Response: ${res.statusCode} ${res.statusMessage} (${url})`))
       }
 
-      let data = null;
+      let data: string | null = null;
 
       // called when a data chunk is received.
-      res.on("data", chunk => {
+      res.on("data", (chunk: string) => {
         if (data === null) {
           data = chunk;
           return;
@@ -45,7 +45,7 @@ const nodeFetcher: Fetcher = url =>
       });
 
       // called when the complete response is received.
-      res.on("end", () => resolve(data));
+      res.on("end", () => resolve(data as string));
 
       // called when the connection is closed.
       res.on("close", () => {

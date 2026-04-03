@@ -4,12 +4,12 @@ import { OK, InternalServerError } from "../status";
 // node: http and https mocks are duplicated
 jest.mock("http", () => {
   return {
-    get: jest.fn((url, callback) => {
-      let onErrorCallback;
+    get: jest.fn((url: string, callback: Function) => {
+      let onErrorCallback: Function | undefined;
       const isPrematureClose = url === "http://premature-close.url";
 
-      const res = {
-        on: jest.fn((eventName, fn) => {
+      const res: any = {
+        on: jest.fn((eventName: string, fn: Function) => {
           if (url === "http://invalid.url" && onErrorCallback) {
             const error = new Error("500 Internal Server Error");
             (<any>error).response = res;
@@ -28,9 +28,7 @@ jest.mock("http", () => {
               fn();
             }
           } else if (eventName === "close") {
-            if (isPrematureClose) {
-              fn();
-            }
+            fn();
           }
 
           return res;
@@ -54,11 +52,11 @@ jest.mock("http", () => {
 // node: http and https mocks are duplicated
 jest.mock("https", () => {
   return {
-    get: jest.fn((url, callback) => {
-      let onErrorCallback;
+    get: jest.fn((url: string, callback: Function) => {
+      let onErrorCallback: Function | undefined;
 
-      const res = {
-        on: jest.fn((eventName, fn) => {
+      const res: any = {
+        on: jest.fn((eventName: string, fn: Function) => {
           if (url === "https://invalid.url" && onErrorCallback) {
             onErrorCallback(new Error("500 Internal Server Error"));
             return res;
@@ -91,7 +89,7 @@ describe("lib/nodeFetcher", () => {
   test("invalid URL rejects", () => {
     expect.assertions(1);
     const expected = new Error("URL must be a string.");
-    const actual = nodeFetcher(null);
+    const actual = nodeFetcher(null as any);
     return expect(actual).rejects.toStrictEqual(expected);
   });
 

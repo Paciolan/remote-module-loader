@@ -30,7 +30,7 @@ describe("lib/createRequires", () => {
   });
 
   test("missing dependency (null) throws", () => {
-    const requires = createRequires(null);
+    const requires = createRequires(null as any);
     const actual = () => requires("xyz");
     const expected = "Could not require 'xyz'. 'xyz' does not exist in dependencies."; // prettier-ignore
     expect(actual).toThrow(expected);

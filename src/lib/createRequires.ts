@@ -15,5 +15,5 @@ export const createRequires: CreateRequires = dependencies => name => {
     );
   }
 
-  return _dependencies[name];
+  return (_dependencies as Record<string, any>)[name];
 };

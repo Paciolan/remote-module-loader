@@ -5,7 +5,7 @@ import { OK, InternalServerError } from "../../status";
 describe("lib/xmlHttpRequestFetcher", () => {
   const originalXmlHttpRequest = (global as any).XMLHttpRequest;
 
-  let mockXhrRequest;
+  let mockXhrRequest: any;
 
   const mockXhr = {
     open: jest.fn().mockImplementation((...args) => (mockXhrRequest = args)),

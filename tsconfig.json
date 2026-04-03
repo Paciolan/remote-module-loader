@@ -4,6 +4,7 @@
       "ES2015",
       "DOM"
     ],
+    "rootDir": "src",
     "outDir": "dist",
     "module": "commonjs",
     "types": [

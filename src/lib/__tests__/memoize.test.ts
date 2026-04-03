@@ -6,7 +6,7 @@ describe("lib/memoize", () => {
     const memoized = memoize(upper);
     memoized("abc");
     memoized("abc");
-    expect(upper).toBeCalledTimes(1);
+    expect(upper).toHaveBeenCalledTimes(1);
   });
 
   test("does not memoizes different argument", () => {

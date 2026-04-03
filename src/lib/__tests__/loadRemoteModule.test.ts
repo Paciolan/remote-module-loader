@@ -33,7 +33,7 @@ const amdReturnOverridesExportsModule =
 const requiresModules =
   'Object.assign(exports, { default: () => require("test") })';
 
-const mockFetcher = url =>
+const mockFetcher = (url: string) =>
     url === "http://valid.url" ? Promise.resolve(validModuleCjs)
     : url === "http://requires.url" ? Promise.resolve(requiresModules)
     : url === "http://umdmodule.url" ? Promise.resolve(umdModule)
@@ -52,7 +52,7 @@ jest.mock("../xmlHttpRequestFetcher", () => {
   // Set window before loadRemoteModule.ts evaluates isBrowser so
   // xmlHttpRequestFetcher is selected as the default fetcher.
   (global as any).window = { document: {} };
-  return { default: jest.fn().mockImplementation(url => mockFetcher(url)) };
+  return { __esModule: true, default: jest.fn().mockImplementation((url: string) => mockFetcher(url)) };
 });
 
 describe("lib/loadRemoteModule", () => {
@@ -91,8 +91,8 @@ describe("lib/loadRemoteModule", () => {
     const expected = "http://valid.url";
     const loadRemoteModule = createLoadRemoteModule();
     await loadRemoteModule(expected);
-    expect(xmlHttpRequestFetcher).toBeCalledWith(expected);
-    expect(xmlHttpRequestFetcher).toBeCalledTimes(1);
+    expect(xmlHttpRequestFetcher).toHaveBeenCalledWith(expected);
+    expect(xmlHttpRequestFetcher).toHaveBeenCalledTimes(1);
   });
 
   test("requires defaults to error", async () => {
@@ -102,7 +102,7 @@ describe("lib/loadRemoteModule", () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const module = await loadRemoteModule("http://requires.url");
     const actual = () => module.default();
-    expect(actual).toThrowError(expected);
+    expect(actual).toThrow(expected);
   });
 
   test("umd load", async () => {
@@ -133,7 +133,7 @@ describe("lib/loadRemoteModule", () => {
   test("return array from named exports function", async () => {
     const remoteModuleLoader = createLoadRemoteModule();
     const result = await remoteModuleLoader("http://namedexports.url");
-    const expected = [];
+    const expected: any[] = [];
     const actual = result.list();
     expect(actual).toMatchObject(expected);
   });
@@ -193,7 +193,7 @@ describe("lib/loadRemoteModule", () => {
 
   test("amd define resolves external dependencies via requires", async () => {
     const fakeLodash = { map: () => "mapped" };
-    const requires = name => (name === "lodash" ? fakeLodash : undefined);
+    const requires = (name: string) => (name === "lodash" ? fakeLodash : undefined);
     const loadRemoteModule = createLoadRemoteModule({
       fetcher: mockFetcher,
       requires
