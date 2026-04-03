@@ -40,8 +40,32 @@ export const createLoadRemoteModule: CreateLoadRemoteModule = ({
     _fetcher(url).then(data => {
       const exports = {};
       const module = { exports };
-      const func = new Function("require", "module", "exports", data);
-      func(_requires, module, exports);
+
+      const define: any = (...args: any[]) => {
+        let factory: Function;
+        let deps: string[];
+
+        if (typeof args[args.length - 1] === "function") {
+          factory = args.pop();
+        } else {
+          module.exports = args[args.length - 1];
+          return;
+        }
+
+        deps = Array.isArray(args[args.length - 1]) ? args.pop() : ["require", "exports", "module"];
+
+        const builtins = { exports, require: _requires, module };
+        const resolved = deps.map(dep => builtins[dep] || _requires(dep));
+
+        const result = factory(...resolved);
+        if (result !== undefined) {
+          module.exports = result;
+        }
+      };
+      define.amd = {};
+
+      const func = new Function("require", "module", "exports", "define", data);
+      func(_requires, module, exports, define);
       return module.exports;
     })
   );

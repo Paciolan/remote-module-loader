@@ -3,7 +3,9 @@ import { createLoadRemoteModule } from "../loadRemoteModule";
 import xmlHttpRequestFetcher from "../xmlHttpRequestFetcher";
 
 const invalidModule = "'";
-const validModule = 'Object.assign(exports, { default: () => "SUCCESS!" })';
+const validModuleCjs = 'Object.assign(exports, { default: () => "SUCCESS!" })';
+const validModuleAmd =
+  'define(["exports"], function (exports) { Object.assign(exports, { default: function () { return "AMD SUCCESS!"; } }); })';
 const namedExportsModule =
   'Object.assign(exports, {\n' +
   '  delete: () => "DELETED",\n' +
@@ -15,13 +17,34 @@ const umdModule = fs.readFileSync(
   __dirname + "/h-document-element.umd",
   "utf8"
 );
+const amdValueModule = 'define({ greeting: "HELLO" })';
+const amdFactoryReturnModule =
+  'define(function () { return { computed: "RETURNED" }; })';
+const amdWithDepsModule =
+  'define(["require"], function (req) { return { hasRequire: typeof req === "function" }; })';
+const amdWithModuleDepModule =
+  'define(["module"], function (mod) { mod.exports = { fromModule: true }; })';
+const amdWithExternalDepModule =
+  'define(["lodash"], function (lodash) { return { dep: lodash }; })';
+const amdCjsWrapperModule =
+  'define(function (require, exports, module) { exports.cjs = true; })';
+const amdReturnOverridesExportsModule =
+  'define(["exports"], function (exports) { exports.tmp = 1; return { real: true }; })';
 const requiresModules =
   'Object.assign(exports, { default: () => require("test") })';
 
 const mockFetcher = url =>
-    url === "http://valid.url" ? Promise.resolve(validModule)
+    url === "http://valid.url" ? Promise.resolve(validModuleCjs)
     : url === "http://requires.url" ? Promise.resolve(requiresModules)
     : url === "http://umdmodule.url" ? Promise.resolve(umdModule)
+    : url === "http://amdmodule.url" ? Promise.resolve(validModuleAmd)
+    : url === "http://amdvalue.url" ? Promise.resolve(amdValueModule)
+    : url === "http://amdfactoryreturn.url" ? Promise.resolve(amdFactoryReturnModule)
+    : url === "http://amdwithdeps.url" ? Promise.resolve(amdWithDepsModule)
+    : url === "http://amdwithmoduledep.url" ? Promise.resolve(amdWithModuleDepModule)
+    : url === "http://amdwithexternaldep.url" ? Promise.resolve(amdWithExternalDepModule)
+    : url === "http://amdcjswrapper.url" ? Promise.resolve(amdCjsWrapperModule)
+    : url === "http://amdreturnoverrides.url" ? Promise.resolve(amdReturnOverridesExportsModule)
     : url === "http://namedexports.url" ? Promise.resolve(namedExportsModule)
     : Promise.resolve(invalidModule); // prettier-ignore
 
@@ -129,5 +152,65 @@ describe("lib/loadRemoteModule", () => {
     const expected = "UPDATED";
     const actual = result.update();
     expect(actual).toBe(expected);
+  });
+
+  test("amd module resolves", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const module = await loadRemoteModule("http://amdmodule.url");
+    const actual = Object.keys(module);
+    expect(actual).toMatchObject(["default"]);
+  });
+
+  test("amd module executes", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const module = await loadRemoteModule("http://amdmodule.url");
+    expect(module.default()).toBe("AMD SUCCESS!");
+  });
+
+  test("amd define with value export (no factory)", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const result = await loadRemoteModule("http://amdvalue.url");
+    expect(result).toEqual({ greeting: "HELLO" });
+  });
+
+  test("amd define with factory return value", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const result = await loadRemoteModule("http://amdfactoryreturn.url");
+    expect(result).toEqual({ computed: "RETURNED" });
+  });
+
+  test("amd define resolves require dependency", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const result = await loadRemoteModule("http://amdwithdeps.url");
+    expect(result).toEqual({ hasRequire: true });
+  });
+
+  test("amd define resolves module dependency", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const result = await loadRemoteModule("http://amdwithmoduledep.url");
+    expect(result).toEqual({ fromModule: true });
+  });
+
+  test("amd define resolves external dependencies via requires", async () => {
+    const fakeLodash = { map: () => "mapped" };
+    const requires = name => (name === "lodash" ? fakeLodash : undefined);
+    const loadRemoteModule = createLoadRemoteModule({
+      fetcher: mockFetcher,
+      requires
+    });
+    const result = await loadRemoteModule("http://amdwithexternaldep.url");
+    expect(result).toEqual({ dep: fakeLodash });
+  });
+
+  test("amd factory without deps receives require, exports, module", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const result = await loadRemoteModule("http://amdcjswrapper.url");
+    expect(result).toEqual({ cjs: true });
+  });
+
+  test("amd factory return value overrides exports", async () => {
+    const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
+    const result = await loadRemoteModule("http://amdreturnoverrides.url");
+    expect(result).toEqual({ real: true });
   });
 });
