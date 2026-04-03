@@ -1,6 +1,6 @@
 # Remote Module Loader ![coverage:100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 
-Loads a CommonJS module from a remote URL for the Browser or Node.js.
+Loads a CommonJS, AMD, or UMD module from a remote URL for the Browser or Node.js.
 
 ![Lunar Module](https://raw.githubusercontent.com/Paciolan/remote-module-loader/master/media/logo-small.png)
 
@@ -61,7 +61,7 @@ export default createLoadRemoteModule({ requires });
 
 The default loader can be overridden if you want to use an alternate method.
 
-This example uses `axios` for the fetcher.
+This example uses `fetch` for the fetcher.
 
 ```javascript
 /**
@@ -69,9 +69,8 @@ This example uses `axios` for the fetcher.
  */
 
 import createLoadRemoteModule from "@paciolan/remote-module-loader";
-import axios from "axios";
 
-const fetcher = url => axios.get(url).then(request => request.data);
+const fetcher = url => fetch(url).then(response => response.text());
 
 export default createLoadRemoteModule({ fetcher });
 ```
@@ -139,9 +138,9 @@ main();
 
 ## Creating a Remote Module
 
-Remote Modules must be in the CommonJS format, using `exports` to export functionality.
+Remote modules can be in CommonJS, AMD, or UMD format. The loader provides both `require`/`module`/`exports` (CommonJS) and `define` (AMD) to every module, so the module itself determines which format to use.
 
-This is an example of a simple CommonJS module:
+### CommonJS
 
 ```javascript
 function helloWorld() {
@@ -163,16 +162,46 @@ exports = {
 exports.default = "SUCCESS!";
 ```
 
+### AMD
+
+```javascript
+define(["exports"], function (exports) {
+  exports.default = function helloWorld() {
+    console.log("Hello World!");
+  };
+});
+```
+
+AMD modules can also return a value directly from the factory:
+
+```javascript
+define(function () {
+  return {
+    default: function helloWorld() {
+      console.log("Hello World!");
+    }
+  };
+});
+```
+
 ### Webpack
 
-Webpack can be setup to export as CommonJS.
+Webpack can be setup to export as CommonJS or AMD.
 
-Inside `webpack.config.js`, set the `libraryTarget` to `"commonjs"`.
+Inside `webpack.config.js`, set the `libraryTarget` to `"commonjs"` or `"amd"`.
 
 ```javascript
 module.exports = {
   output: {
     libraryTarget: "commonjs"
+  }
+};
+```
+
+```javascript
+module.exports = {
+  output: {
+    libraryTarget: "amd"
   }
 };
 ```
@@ -196,7 +225,7 @@ module.exports = {
 
 Sites with a `content_security_policy` header set are likely to not work. CSP puts a restriction on using `new Function`, which `remote-module-loader` relies upon.
 
-[Read more on CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)
+[Read more on CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
 
 ## Alternatives
 
@@ -204,6 +233,6 @@ Sites with a `content_security_policy` header set are likely to not work. CSP pu
 
 ## Contributors
 
-Joel Thoms (https://twitter.com/joelnet)
+Joel Thoms (https://x.com/joelnet)
 
 Icon made by [Freepik](https://www.flaticon.com/authors/freepik) from [www.flaticon.com](www.flaticon.com)
