@@ -3,6 +3,9 @@
   "version": "1.0.0-symantec-versioning",
   "description": "",
   "main": "dist/index.js",
+  "browser": {
+    "./dist/lib/nodeFetcher.js": false
+  },
   "author": "Paciolan",
   "license": "MIT",
   "repository": {
