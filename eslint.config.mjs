@@ -20,13 +20,6 @@ export default [
         require: "readonly",
         process: "readonly",
         __dirname: "readonly",
-        describe: "readonly",
-        test: "readonly",
-        expect: "readonly",
-        beforeAll: "readonly",
-        beforeEach: "readonly",
-        afterAll: "readonly",
-        jest: "readonly",
         global: "readonly"
       }
     },

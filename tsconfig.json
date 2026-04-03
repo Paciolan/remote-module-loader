@@ -8,8 +8,7 @@
     "outDir": "dist",
     "module": "commonjs",
     "types": [
-      "node",
-      "jest"
+      "node"
     ],
     "sourceMap": true,
   },

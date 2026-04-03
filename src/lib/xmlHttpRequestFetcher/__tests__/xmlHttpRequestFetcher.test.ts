@@ -1,3 +1,5 @@
+import { describe, test, before, after, mock } from "node:test";
+import assert from "node:assert";
 import xmlHttpRequestFetcher from "..";
 import { OPENED, UNSENT, DONE } from "../readyState";
 import { OK, InternalServerError } from "../../status";
@@ -7,40 +9,46 @@ describe("lib/xmlHttpRequestFetcher", () => {
 
   let mockXhrRequest: any;
 
-  const mockXhr = {
-    open: jest.fn().mockImplementation((...args) => (mockXhrRequest = args)),
-    send: jest.fn().mockImplementation(() => {
+  const mockXhr: any = {
+    open: mock.fn((...args: any[]) => (mockXhrRequest = args)),
+    send: mock.fn(() => {
       const isValid = mockXhrRequest[1] === "http://valid.url";
 
       mockXhr.readyState = OPENED;
-      (<any>mockXhr).onreadystatechange();
+      mockXhr.onreadystatechange();
 
       mockXhr.readyState = DONE;
-      (<any>mockXhr).status = isValid ? OK : InternalServerError;
-      (<any>mockXhr).responseText = isValid ? "SUCCESS" : "";
-      (<any>mockXhr).statusText = isValid ? "OK" : "Internal Server Error";
-      (<any>mockXhr).onreadystatechange();
+      mockXhr.status = isValid ? OK : InternalServerError;
+      mockXhr.responseText = isValid ? "SUCCESS" : "";
+      mockXhr.statusText = isValid ? "OK" : "Internal Server Error";
+      mockXhr.onreadystatechange();
     }),
     readyState: UNSENT
   };
 
-  beforeAll(() => {
-    (<any>global).XMLHttpRequest = jest.fn(() => mockXhr);
+  before(() => {
+    (global as any).XMLHttpRequest = function () {
+      return mockXhr;
+    };
   });
 
-  afterAll(() => {
-    global.XMLHttpRequest = originalXmlHttpRequest;
+  after(() => {
+    (global as any).XMLHttpRequest = originalXmlHttpRequest;
   });
 
   test("valid request resolves", async () => {
     const expected = "SUCCESS";
     const actual = await xmlHttpRequestFetcher("http://valid.url");
-    expect(actual).toBe(expected);
+    assert.strictEqual(actual, expected);
   });
 
-  test("invalid request rejects", () => {
-    const expected = new Error('HTTP Error Response: 500 Internal Server Error (http://invalid.url)');
-    const actual = xmlHttpRequestFetcher("http://invalid.url");
-    return expect(actual).rejects.toStrictEqual(expected);
+  test("invalid request rejects", async () => {
+    const expected = new Error(
+      "HTTP Error Response: 500 Internal Server Error (http://invalid.url)"
+    );
+    await assert.rejects(
+      xmlHttpRequestFetcher("http://invalid.url"),
+      expected
+    );
   });
 });

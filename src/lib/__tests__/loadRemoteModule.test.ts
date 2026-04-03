@@ -1,6 +1,6 @@
+import { describe, test, mock, beforeEach, after } from "node:test";
+import assert from "node:assert";
 import * as fs from "fs";
-import { createLoadRemoteModule } from "../loadRemoteModule";
-import xmlHttpRequestFetcher from "../xmlHttpRequestFetcher";
 
 const invalidModule = "'";
 const validModuleCjs = 'Object.assign(exports, { default: () => "SUCCESS!" })';
@@ -48,27 +48,33 @@ const mockFetcher = (url: string) =>
     : url === "http://namedexports.url" ? Promise.resolve(namedExportsModule)
     : Promise.resolve(invalidModule); // prettier-ignore
 
-jest.mock("../xmlHttpRequestFetcher", () => {
-  // Set window before loadRemoteModule.ts evaluates isBrowser so
-  // xmlHttpRequestFetcher is selected as the default fetcher.
-  (global as any).window = { document: {} };
-  return { __esModule: true, default: jest.fn().mockImplementation((url: string) => mockFetcher(url)) };
+// Set window before loadRemoteModule.ts evaluates isBrowser so
+// xmlHttpRequestFetcher is selected as the default fetcher.
+(global as any).window = { document: {} };
+
+const mockXhrFetcher = mock.fn((url: string) => mockFetcher(url));
+
+mock.module("../xmlHttpRequestFetcher", {
+  defaultExport: mockXhrFetcher
 });
 
+const { createLoadRemoteModule } = require("../loadRemoteModule");
+
 describe("lib/loadRemoteModule", () => {
-  afterAll(() => {
+  after(() => {
     delete (global as any).window;
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockXhrFetcher.mock.resetCalls();
   });
 
-  test("invalid module rejects", () => {
-    const expected = SyntaxError("Invalid or unexpected token");
+  test("invalid module rejects", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
-    const actual = loadRemoteModule("http://fake.url");
-    return expect(actual).rejects.toMatchObject(expected);
+    await assert.rejects(loadRemoteModule("http://fake.url"), (err: any) => {
+      assert.ok(err instanceof SyntaxError);
+      return true;
+    });
   });
 
   test("valid module resolves", async () => {
@@ -76,7 +82,7 @@ describe("lib/loadRemoteModule", () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const module = await loadRemoteModule("http://valid.url");
     const actual = Object.keys(module);
-    return expect(actual).toMatchObject(expected);
+    assert.deepStrictEqual(actual, expected);
   });
 
   test("valid module executes", async () => {
@@ -84,42 +90,42 @@ describe("lib/loadRemoteModule", () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const module = await loadRemoteModule("http://valid.url");
     const actual = module.default();
-    return expect(actual).toBe(expected);
+    assert.strictEqual(actual, expected);
   });
 
   test("fetcher defaults to xmlHttpRequestFetcher", async () => {
     const expected = "http://valid.url";
     const loadRemoteModule = createLoadRemoteModule();
     await loadRemoteModule(expected);
-    expect(xmlHttpRequestFetcher).toHaveBeenCalledWith(expected);
-    expect(xmlHttpRequestFetcher).toHaveBeenCalledTimes(1);
+    assert.deepStrictEqual(mockXhrFetcher.mock.calls[0].arguments, [expected]);
+    assert.strictEqual(mockXhrFetcher.mock.callCount(), 1);
   });
 
   test("requires defaults to error", async () => {
-    const expected = Error(
-      "Could not require 'test'. The 'requires' function was not provided."
-    );
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const module = await loadRemoteModule("http://requires.url");
     const actual = () => module.default();
-    expect(actual).toThrow(expected);
+    assert.throws(actual, {
+      message:
+        "Could not require 'test'. The 'requires' function was not provided."
+    });
   });
 
   test("umd load", async () => {
     const remoteModuleLoader = createLoadRemoteModule();
     const result = await remoteModuleLoader("http://umdmodule.url");
-    expect(result.Fragment).toBeDefined();
-    expect(result.createElement).toBeDefined();
-    expect(result.h).toBeDefined();
+    assert.notStrictEqual(result.Fragment, undefined);
+    assert.notStrictEqual(result.createElement, undefined);
+    assert.notStrictEqual(result.h, undefined);
   });
 
   test("load functions using named exports", async () => {
     const remoteModuleLoader = createLoadRemoteModule();
     const result = await remoteModuleLoader("http://namedexports.url");
-    expect(result.create).toBeDefined();
-    expect(result.delete).toBeDefined();
-    expect(result.update).toBeDefined();
-    expect(result.list).toBeDefined();
+    assert.notStrictEqual(result.create, undefined);
+    assert.notStrictEqual(result.delete, undefined);
+    assert.notStrictEqual(result.update, undefined);
+    assert.notStrictEqual(result.list, undefined);
   });
 
   test("return string from create named exports function", async () => {
@@ -127,7 +133,7 @@ describe("lib/loadRemoteModule", () => {
     const result = await remoteModuleLoader("http://namedexports.url");
     const expected = "CREATED";
     const actual = result.create();
-    expect(actual).toBe(expected);
+    assert.strictEqual(actual, expected);
   });
 
   test("return array from named exports function", async () => {
@@ -135,7 +141,7 @@ describe("lib/loadRemoteModule", () => {
     const result = await remoteModuleLoader("http://namedexports.url");
     const expected: any[] = [];
     const actual = result.list();
-    expect(actual).toMatchObject(expected);
+    assert.deepStrictEqual(actual, expected);
   });
 
   test("return string from delete named exports function", async () => {
@@ -143,7 +149,7 @@ describe("lib/loadRemoteModule", () => {
     const result = await remoteModuleLoader("http://namedexports.url");
     const expected = "DELETED";
     const actual = result.delete();
-    expect(actual).toBe(expected);
+    assert.strictEqual(actual, expected);
   });
 
   test("return string from update named exports function", async () => {
@@ -151,66 +157,67 @@ describe("lib/loadRemoteModule", () => {
     const result = await remoteModuleLoader("http://namedexports.url");
     const expected = "UPDATED";
     const actual = result.update();
-    expect(actual).toBe(expected);
+    assert.strictEqual(actual, expected);
   });
 
   test("amd module resolves", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const module = await loadRemoteModule("http://amdmodule.url");
     const actual = Object.keys(module);
-    expect(actual).toMatchObject(["default"]);
+    assert.deepStrictEqual(actual, ["default"]);
   });
 
   test("amd module executes", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const module = await loadRemoteModule("http://amdmodule.url");
-    expect(module.default()).toBe("AMD SUCCESS!");
+    assert.strictEqual(module.default(), "AMD SUCCESS!");
   });
 
   test("amd define with value export (no factory)", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const result = await loadRemoteModule("http://amdvalue.url");
-    expect(result).toEqual({ greeting: "HELLO" });
+    assert.deepStrictEqual(result, { greeting: "HELLO" });
   });
 
   test("amd define with factory return value", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const result = await loadRemoteModule("http://amdfactoryreturn.url");
-    expect(result).toEqual({ computed: "RETURNED" });
+    assert.deepStrictEqual(result, { computed: "RETURNED" });
   });
 
   test("amd define resolves require dependency", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const result = await loadRemoteModule("http://amdwithdeps.url");
-    expect(result).toEqual({ hasRequire: true });
+    assert.deepStrictEqual(result, { hasRequire: true });
   });
 
   test("amd define resolves module dependency", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const result = await loadRemoteModule("http://amdwithmoduledep.url");
-    expect(result).toEqual({ fromModule: true });
+    assert.deepStrictEqual(result, { fromModule: true });
   });
 
   test("amd define resolves external dependencies via requires", async () => {
     const fakeLodash = { map: () => "mapped" };
-    const requires = (name: string) => (name === "lodash" ? fakeLodash : undefined);
+    const requires = (name: string) =>
+      name === "lodash" ? fakeLodash : undefined;
     const loadRemoteModule = createLoadRemoteModule({
       fetcher: mockFetcher,
       requires
     });
     const result = await loadRemoteModule("http://amdwithexternaldep.url");
-    expect(result).toEqual({ dep: fakeLodash });
+    assert.deepStrictEqual(result, { dep: fakeLodash });
   });
 
   test("amd factory without deps receives require, exports, module", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const result = await loadRemoteModule("http://amdcjswrapper.url");
-    expect(result).toEqual({ cjs: true });
+    assert.deepStrictEqual(result, { cjs: true });
   });
 
   test("amd factory return value overrides exports", async () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const result = await loadRemoteModule("http://amdreturnoverrides.url");
-    expect(result).toEqual({ real: true });
+    assert.deepStrictEqual(result, { real: true });
   });
 });

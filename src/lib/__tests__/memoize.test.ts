@@ -1,19 +1,21 @@
+import { describe, test, mock } from "node:test";
+import assert from "node:assert";
 import memoize from "../memoize";
 
 describe("lib/memoize", () => {
   test("memoizes same argument", () => {
-    const upper = jest.fn().mockImplementation(s => s.toUpperCase());
+    const upper = mock.fn((s: string) => s.toUpperCase());
     const memoized = memoize(upper);
     memoized("abc");
     memoized("abc");
-    expect(upper).toHaveBeenCalledTimes(1);
+    assert.strictEqual(upper.mock.callCount(), 1);
   });
 
   test("does not memoizes different argument", () => {
-    const upper = jest.fn().mockImplementation(s => s.toUpperCase());
+    const upper = mock.fn((s: string) => s.toUpperCase());
     const memoized = memoize(upper);
     memoized("abc");
     const actual = memoized("xyz");
-    expect(actual).toBe("XYZ");
+    assert.strictEqual(actual, "XYZ");
   });
 });
