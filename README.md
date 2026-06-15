@@ -140,6 +140,22 @@ main();
 
 Remote modules can be in CommonJS, AMD, or UMD format. The loader provides both `require`/`module`/`exports` (CommonJS) and `define` (AMD) to every module, so the module itself determines which format to use.
 
+### Specifying the module format
+
+The `type` option tells the loader which format the remote module is in:
+
+| `type` | Loads |
+|--------|-------|
+| `"amd"` (default) | AMD modules |
+| `"cjs"` | CommonJS modules |
+| `"umd"` | UMD modules |
+
+```javascript
+const loadRemoteModule = createLoadRemoteModule({ type: "umd" });
+```
+
+Use `"cjs"` or `"umd"` when loading a CommonJS or UMD bundle that embeds UMD dependencies (for example, a Vite 8 library build that bundles lodash), which can otherwise fail under the default `"amd"` behavior. See [issue #39](https://github.com/Paciolan/remote-module-loader/issues/39).
+
 ### CommonJS
 
 ```javascript

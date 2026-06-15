@@ -19,6 +19,7 @@ const defaultRequires = (name: string) => {
 export interface CreateLoadRemoteModuleOptions {
   requires?: any;
   fetcher?: Fetcher;
+  type?: "amd" | "cjs" | "umd";
 }
 
 interface LoadRemoteModule {
@@ -31,7 +32,8 @@ interface CreateLoadRemoteModule {
 
 export const createLoadRemoteModule: CreateLoadRemoteModule = ({
   requires,
-  fetcher
+  fetcher,
+  type
 } = {}) => {
   const _requires = requires || defaultRequires;
   const _fetcher = fetcher || defaultFetcher;
@@ -40,6 +42,18 @@ export const createLoadRemoteModule: CreateLoadRemoteModule = ({
     _fetcher(url).then(data => {
       const exports = {};
       const module = { exports };
+
+      // "cjs" and "umd" keep `define` out of scope entirely. A UMD wrapper
+      // then resolves through its CommonJS branch instead of registering via
+      // `define`, which also fixes CJS bundles that embed a UMD dependency
+      // (an injected `define` would otherwise hijack the dependency's exports;
+      // GitHub issue #39). "umd" is handled identically to "cjs"; it exists as
+      // a separate option only to read clearly at the call site.
+      if (type === "cjs" || type === "umd") {
+        const func = new Function("require", "module", "exports", data);
+        func(_requires, module, exports);
+        return module.exports;
+      }
 
       const define: any = (...args: any[]) => {
         let factory: Function;
