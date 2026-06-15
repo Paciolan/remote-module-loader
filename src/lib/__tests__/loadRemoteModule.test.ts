@@ -32,6 +32,22 @@ const amdReturnOverridesExportsModule =
   'define(["exports"], function (exports) { exports.tmp = 1; return { real: true }; })';
 const requiresModules =
   'Object.assign(exports, { default: () => require("test") })';
+// Mimics a Vite 8 (Rolldown) CJS bundle embedding a UMD dependency: the
+// bundler shadows module/exports with an internal shim but NOT define, so
+// an injected define hijacks the dependency's exports (GitHub issue #39).
+const cjsWithEmbeddedUmdModule =
+  'var dep = (function () {\n' +
+  '  var depModule = { exports: {} };\n' +
+  '  (function (module, exports) {\n' +
+  '    if (typeof define == "function" && typeof define.amd == "object" && define.amd) {\n' +
+  '      define(function () { return { value: "AMD PATH" }; });\n' +
+  '    } else {\n' +
+  '      module.exports = { value: "CJS PATH" };\n' +
+  '    }\n' +
+  '  })(depModule, depModule.exports);\n' +
+  '  return depModule.exports;\n' +
+  '})();\n' +
+  'module.exports = { default: function () { return dep.value; } };';
 
 const mockFetcher = (url: string) =>
     url === "http://valid.url" ? Promise.resolve(validModuleCjs)
@@ -46,6 +62,7 @@ const mockFetcher = (url: string) =>
     : url === "http://amdcjswrapper.url" ? Promise.resolve(amdCjsWrapperModule)
     : url === "http://amdreturnoverrides.url" ? Promise.resolve(amdReturnOverridesExportsModule)
     : url === "http://namedexports.url" ? Promise.resolve(namedExportsModule)
+    : url === "http://cjsembeddedumd.url" ? Promise.resolve(cjsWithEmbeddedUmdModule)
     : Promise.resolve(invalidModule); // prettier-ignore
 
 // Set window before loadRemoteModule.ts evaluates isBrowser so
@@ -219,5 +236,65 @@ describe("lib/loadRemoteModule", () => {
     const loadRemoteModule = createLoadRemoteModule({ fetcher: mockFetcher });
     const result = await loadRemoteModule("http://amdreturnoverrides.url");
     assert.deepStrictEqual(result, { real: true });
+  });
+
+  test("type:'amd' loads amd module", async () => {
+    const loadRemoteModule = createLoadRemoteModule({
+      fetcher: mockFetcher,
+      type: "amd"
+    });
+    const module = await loadRemoteModule("http://amdmodule.url");
+    assert.strictEqual(module.default(), "AMD SUCCESS!");
+  });
+
+  test("type:'cjs' loads plain cjs module", async () => {
+    const loadRemoteModule = createLoadRemoteModule({
+      fetcher: mockFetcher,
+      type: "cjs"
+    });
+    const module = await loadRemoteModule("http://valid.url");
+    assert.strictEqual(module.default(), "SUCCESS!");
+  });
+
+  test("type:'cjs' rejects modules that call define", async () => {
+    const loadRemoteModule = createLoadRemoteModule({
+      fetcher: mockFetcher,
+      type: "cjs"
+    });
+    await assert.rejects(loadRemoteModule("http://amdmodule.url"), (err: any) => {
+      assert.ok(err instanceof ReferenceError);
+      return true;
+    });
+  });
+
+  test("type:'cjs' evaluates embedded UMD dependency via CommonJS path", async () => {
+    const loadRemoteModule = createLoadRemoteModule({
+      fetcher: mockFetcher,
+      type: "cjs"
+    });
+    const module = await loadRemoteModule("http://cjsembeddedumd.url");
+    assert.strictEqual(module.default(), "CJS PATH");
+  });
+
+  test("type:'umd' loads umd module via its CommonJS branch", async () => {
+    const loadRemoteModule = createLoadRemoteModule({
+      fetcher: mockFetcher,
+      type: "umd"
+    });
+    const result = await loadRemoteModule("http://umdmodule.url");
+    assert.notStrictEqual(result.Fragment, undefined);
+    assert.notStrictEqual(result.createElement, undefined);
+    assert.notStrictEqual(result.h, undefined);
+  });
+
+  test("type:'umd' keeps define out of scope, same as cjs", async () => {
+    const loadRemoteModule = createLoadRemoteModule({
+      fetcher: mockFetcher,
+      type: "umd"
+    });
+    await assert.rejects(loadRemoteModule("http://amdmodule.url"), (err: any) => {
+      assert.ok(err instanceof ReferenceError);
+      return true;
+    });
   });
 });
